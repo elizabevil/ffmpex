@@ -74,8 +74,6 @@ fmt.Println(YourHls{}.Args()) //see args
 paramx.BuildIArgInterface(input, args, YourHls{}, output) // complete args
 ```
 
-
-
 - Get Metadata
 
 ```go
@@ -147,7 +145,5 @@ fmt.Println(typex.NewVideoSize(1024, 720))//720x1024
 fmt.Println(typex.NewRatio(1024, 720))//720:1024
 fmt.Println(typex.NewRate(25, 1))  //25/1
 ```
-
-
 
 - More examples ==>see examples dir 

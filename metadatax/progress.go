@@ -21,34 +21,14 @@ type Progress struct {
 	Bitrate   string `json:"bitrate"`
 	TotalSize string `json:"total_size"`
 
-	Speed string `json:"speed"`
+	Speed      string `json:"speed"`
+	OutTimeUs  string `json:"out_time_us"`
+	OutTimeMs  string `json:"out_time_ms"`
+	OutTime    string `json:"out_time"`
+	Dup        string `json:"dup"`
+	DropFrames string `json:"drop_frames"`
 
 	Progress float64 `json:"progress"`
-}
-
-// GetFramesProcessed ...
-func (p Progress) GetFramesProcessed() string {
-	return p.Frame
-}
-
-// GetCurrentTime ...
-func (p Progress) GetCurrentTime() string {
-	return p.Time
-}
-
-// GetCurrentBitrate ...
-func (p Progress) GetCurrentBitrate() string {
-	return p.Bitrate
-}
-
-// GetProgress ...
-func (p Progress) GetProgress() float64 {
-	return p.Progress
-}
-
-// GetSpeed ...
-func (p Progress) GetSpeed() string {
-	return p.Speed
 }
 
 type DefaultProgress struct {
@@ -79,17 +59,9 @@ func (r DefaultProgress) MakeProgress(stream io.ReadCloser, out chan Progress) {
 	buf := make([]byte, 2)
 	scanner.Buffer(buf, bufio.MaxScanTokenSize)
 	var re = regexp.MustCompile(`=\s+`)
-	var framesProcessed string
-	var currentTime string
-	var currentBitrate string
-	var currentSpeed string
-	var q string
-	var size string
-	var total_size string
-	var fps string
+	pp := Progress{}
 	dursec, _ := strconv.ParseFloat(r.TotalDuration, 64)
 	for scanner.Scan() {
-		pp := Progress{}
 		line := scanner.Text()
 		if strings.Contains(line, "frame=") && strings.Contains(line, "time=") && strings.Contains(line, "bitrate=") {
 			st := re.ReplaceAllString(line, `=`)
@@ -102,37 +74,35 @@ func (r DefaultProgress) MakeProgress(stream io.ReadCloser, out chan Progress) {
 					fieldvalue := strings.Split(field, "=")[1]
 					switch fieldname {
 					case "frame":
-						framesProcessed = fieldvalue
+						pp.Frame = fieldvalue
 					case "fps":
-						fps = fieldvalue
+						pp.Fps = fieldvalue
 					case "q":
-						q = fieldvalue
-
+						pp.Q = fieldvalue
 					case "size":
-						size = fieldvalue
+						pp.Size = fieldvalue
 					case "time":
-						currentTime = fieldvalue
+						pp.Time = fieldvalue
 					case "bitrate":
-						currentBitrate = fieldvalue
+						pp.Bitrate = fieldvalue
 					case "total_size":
-						total_size = fieldvalue
+						pp.TotalSize = fieldvalue
 					case "speed":
-						currentSpeed = fieldvalue
+						pp.Speed = fieldvalue
+					case "out_time_us":
+						pp.OutTimeUs = fieldvalue
+					case "out_time_ms":
+						pp.OutTimeMs = fieldvalue
+					case "out_time":
+						pp.OutTime = fieldvalue
+					case "dup":
+						pp.Dup = fieldvalue
+					case "drop_frames":
+						pp.DropFrames = fieldvalue
 					}
 				}
 			}
-
-			pp.Frame = framesProcessed
-			pp.Fps = fps
-			pp.Q = q
-			pp.Size = size
-			pp.Time = currentTime
-			pp.Bitrate = currentBitrate
-			pp.TotalSize = total_size
-			pp.Speed = currentSpeed
-
-			pp.Progress = (utilx.DurToSec(currentTime) * 100) / dursec
-
+			pp.Progress = (utilx.DurToSec(pp.Time) * 100) / dursec
 			out <- pp
 		}
 	}

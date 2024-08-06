@@ -61,7 +61,7 @@ type MPEGTS struct {
 	NitPeriod typex.SecondF `json:"nit_period" flag:"-nit_period"`
 	//Maximum time in seconds between NIT tables. Default is 0.5.
 
-	TablesVersion bool `json:"tables_version" flag:"-tables_version"`
+	TablesVersion typex.Level `json:"tables_version" flag:"-tables_version"`
 }
 
 type MpegtsFlags = typex.String

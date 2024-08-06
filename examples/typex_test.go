@@ -3,6 +3,7 @@ package examples
 import (
 	"fmt"
 	"github.com/elizabevil/ffmpegx/paramx/typex"
+	"github.com/elizabevil/ffmpegx/transcoderx/utilx"
 	"testing"
 	"time"
 )
@@ -27,6 +28,16 @@ func TestDuration(t *testing.T) {
 	fmt.Println(typex.TimeDurationParseSecondF("200000us"))
 	fmt.Println(typex.TimeDurationParseSecondF("00:01:01"))
 	fmt.Println(typex.TimeDurationParseSecondF("61s"))
+}
+func TestUtilTime(t *testing.T) {
+	//TimeParseFormat := "15:04:05.01"
+	s := "00:00:36.13"
+	parse, err := time.Parse("15:04:05.00", s)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("parse", parse.Sub(typex.TimeZero))
+	fmt.Println("parse", utilx.DurToSec(s))
 }
 func TestVideoParams(t *testing.T) {
 	fmt.Println(typex.NewVideoSize(1024, 720))
