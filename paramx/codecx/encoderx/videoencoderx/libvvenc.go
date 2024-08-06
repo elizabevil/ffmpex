@@ -1,6 +1,9 @@
 package videoencoderx
 
-import "github.com/elizabevil/ffmpegx/paramx/typex"
+import (
+	"github.com/elizabevil/ffmpegx/paramx/flagx"
+	"github.com/elizabevil/ffmpegx/paramx/typex"
+)
 
 /*
 Libvvenc
@@ -15,13 +18,13 @@ type Libvvenc struct {
 
 	G typex.Size `json:"g" flag:"-g"`
 	//Set the GOP size. Currently support for g=1 (Intra only) or default.
-	Preset int `json:"preset" flag:"-preset"`
+	Preset flagx.Preset `json:"preset" flag:"-preset"`
 	//Set the VVenC preset.
 
-	Levelidc int `json:"levelidc" flag:"-levelidc"`
+	Levelidc typex.Level `json:"levelidc" flag:"-levelidc"`
 	//Set level idc.
 
-	Tier int `json:"tier" flag:"-tier"`
+	Tier QsvHevcTier `json:"tier" flag:"-tier"`
 	//Set vvc tier.
 
 	Qp typex.Level `json:"qp" flag:"-qp"`
@@ -33,8 +36,8 @@ type Libvvenc struct {
 	Bitdepth8 typex.Bool `json:"bitdepth8" flag:"-bitdepth8"`
 	//Set 8bit coding mode instead of using 10bit. Default is 0 (off).
 
-	Period      int    `json:"period" flag:"-period"` //	set (intra) refresh period in seconds.
-	VvencParams string `json:"vvenc-params" flag:"-vvenc-params"`
+	Period      typex.SecondI `json:"period" flag:"-period"` //	set (intra) refresh period in seconds.
+	VvencParams string        `json:"vvenc-params" flag:"-vvenc-params"`
 	//Set vvenc options using a list of key=value couples separated by ":". See vvencapp --fullhelp or vvencFFapp --fullhelp for a list of options.
 }
 

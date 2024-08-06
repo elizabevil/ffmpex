@@ -67,7 +67,7 @@ type LIBX264 struct {
 	RcInitOccupancy typex.Number `json:"rc_init_occupancy" flag:"-rc_init_occupancy"` //(vbv-init)
 	//Initial VBV buffer occupancy
 
-	Preset int `json:"preset" flag:"-preset"` // (preset)
+	Preset flagx.Preset `json:"preset" flag:"-preset"` // (preset)
 	//Set the encoding preset.
 
 	Tune Tune `json:"tune" flag:"-tune"` //(tune)

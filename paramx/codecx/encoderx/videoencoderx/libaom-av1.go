@@ -203,8 +203,10 @@ const (
 type Tune string
 
 const (
-	psnr Tune = "psnr" // (0)
-	ssim Tune = "ssim" // (1)
+	Tune_psnr        Tune = "psnr"        // (0)
+	Tune_ssim        Tune = "ssim"        // (1)
+	Tune_none        Tune = "none"        // (1)
+	Tune_zerolatency Tune = "zerolatency" // (1)
 )
 
 /*

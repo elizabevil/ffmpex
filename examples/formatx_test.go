@@ -9,11 +9,20 @@ import (
 	"github.com/elizabevil/ffmpegx/paramx/optionx"
 	"github.com/elizabevil/ffmpegx/paramx/typex"
 	"github.com/elizabevil/ffmpegx/transcoderx"
+	"os"
 	"testing"
 	"time"
-	"unsafe"
 )
 
+func TestBool(t *testing.T) {
+	mpegts := demuxerx.Mpegts{
+		ScanAllPmts:    &typex.True,
+		FixTeletextPts: &typex.False,
+		TsPacketsize:   1,
+		MaxPacketSize:  1,
+	}
+	fmt.Println("mpegts", mpegts.Args())
+}
 func TestHls(t *testing.T) {
 	hls := muxerx.HLS{
 		HlsFlags:           flagx.HlsFlags_delete_segments,
@@ -32,23 +41,13 @@ func TestHls(t *testing.T) {
 	//====
 
 }
-
-func TestBool(t *testing.T) {
-	mpegts := demuxerx.Mpegts{
-		ScanAllPmts:    &typex.True,
-		FixTeletextPts: &typex.False,
-		TsPacketsize:   1,
-		MaxPacketSize:  1,
-	}
-	fmt.Println("mpegts", mpegts.Args())
-}
 func TestSegment(t *testing.T) {
 	generic := optionx.Generic{
 		HideBanner: true,
 		Loglevel:   flagx.Loglevel_warning,
 	}
 	expert := optionx.Expert{
-		NoStdin: true,
+		NoStdin: false,
 	}
 	formatInput := optionx.FormatInput{
 		ErrDetect:       flagx.ErrDetect_ignore_err,
@@ -62,29 +61,41 @@ func TestSegment(t *testing.T) {
 		Overwrite: true,
 	}
 	input := optionx.Input{
-		Input: InputVedio,
+		Input: "$from",
 	}
 
 	resampler := optionx.Resampler{
 		Async: 1,
 	}
 	segment := muxerx.Segment{
-		SegmentTime:          10,
+		SegmentTime:          5,
 		SegmentFormat:        "mpegts",
 		SegmentFormatOptions: "mpegts_flags=initial_discontinuity:mpegts_copyts=1",
 		SegmentListType:      muxerx.SegmentListType_m3u8,
 		SegmentListFlags:     "+" + muxerx.SegmentListFlags_live,
+		SegmentWrap:          5, //loop
 		//SegmentListSize:      6,
 	}
 	common := optionx.Common{
-		Codec: "copy",
-		//Vcodec: "copy",
-		//Acodec: "copy",
-		//Scodec: "copy",
-		F: "segment",
+		//Codec: "copy",
+		Vcodec: "copy",
+		Acodec: "copy",
+		Scodec: "copy",
+		//F: "segment",
+		//F: "hls",
+	}
+	hls := muxerx.HLS{
+		HlsTime:            typex.DurationI(5),
+		HlsFlags:           flagx.HlsFlags_delete_segments,
+		HlsDeleteThreshold: 1,
+		HlsSegmentOptions:  "mpegts_flags=initial_discontinuity:mpegts_copyts=1",
 	}
 	line := transcoderx.CommandLine("ffmpeg", paramx.BuildIArgInterface(global, expert, generic, format, resampler, formatInput, input,
-		common, segment, typex.Args{"-segment_list", "output/out.m3u8", "output/%d.ts"},
+		common, segment, typex.Args{"-segment_list", "/home/debi/Desktop/AA/out.m3u8", "/home/debi/Desktop/AA/%d.ts"},
 	))
-	fmt.Println(unsafe.Sizeof(segment), unsafe.Sizeof(line), line)
+	line = transcoderx.CommandLine("ffmpeg", paramx.BuildIArgInterface(global, expert, generic, format, resampler, formatInput, input,
+		common, hls, typex.Args{"/home/debi/Desktop/AA/out.m3u8"},
+	))
+	os.WriteFile("/home/debi/Desktop/AA/RUN.TXT", []byte(line), 0644)
+	fmt.Println(line)
 }

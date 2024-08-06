@@ -1,6 +1,9 @@
 package videoencoderx
 
-import "github.com/elizabevil/ffmpegx/paramx/typex"
+import (
+	"github.com/elizabevil/ffmpegx/paramx/flagx"
+	"github.com/elizabevil/ffmpegx/paramx/typex"
+)
 
 // // LIBOPENH264 9.11 libopenh264
 type LIBOPENH264 struct {
@@ -13,7 +16,7 @@ type LIBOPENH264 struct {
 	Maxrate typex.BitrateInt `json:"maxrate" flag:"-maxrate"`
 	//Set the max bitrate (as a number of bits per second).
 
-	Flags string `json:"flags" flag:"-flags"`
+	Flags flagx.Flag `json:"flags" flag:"-flags"`
 	//Set global header in the bitstream.
 
 	Slices typex.SliceSize `json:"slices" flag:"-slices"`
