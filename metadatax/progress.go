@@ -33,6 +33,7 @@ type Progress struct {
 
 type DefaultProgress struct {
 	TotalDuration string
+	Filter        func(str string) bool
 }
 
 func (r DefaultProgress) MakeProgress(stream io.ReadCloser, out chan Progress) {
@@ -63,7 +64,13 @@ func (r DefaultProgress) MakeProgress(stream io.ReadCloser, out chan Progress) {
 	dursec, _ := strconv.ParseFloat(r.TotalDuration, 64)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, "frame=") && strings.Contains(line, "time=") && strings.Contains(line, "bitrate=") {
+		next := false
+		if r.Filter != nil {
+			next = r.Filter(line)
+		} else {
+			next = strings.Contains(line, "time=") && strings.Contains(line, "size=") && strings.Contains(line, "bitrate=") && strings.Contains(line, "speed=")
+		}
+		if next {
 			st := re.ReplaceAllString(line, `=`)
 			f := strings.Fields(st)
 			for j := 0; j < len(f); j++ {

@@ -150,9 +150,6 @@ func (r RCWT) Args() typex.Args {
 func (r Segment) Args() typex.Args {
 	return parsex.DefaultParser.ParamParse(r)
 }
-func (r Segmenter) Args() typex.Args {
-	return parsex.DefaultParser.ParamParse(r)
-}
 
 func (r SmoothStreaming) Args() typex.Args {
 	return parsex.DefaultParser.ParamParse(r)
