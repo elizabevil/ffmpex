@@ -8,7 +8,6 @@ import (
 	"github.com/elizabevil/ffmpegx/metadatax"
 	"github.com/elizabevil/ffmpegx/paramx"
 	"github.com/elizabevil/ffmpegx/transcoderx/interfacex"
-	"io"
 	"os"
 	"os/exec"
 )
@@ -116,12 +115,14 @@ func Pipeline(ffmpegBin string, ph interfacex.ProgressHandle, args interfacex.IA
 		go handle(cmd.Process)
 	}
 	out := make(chan metadatax.Progress)
+	ctx, cancelFunc := context.WithCancel(context.Background())
 	go func() {
-		ph.MakeProgress(stderrIn, out)
+		ph.MakeProgress(ctx, stderrIn, out)
 	}()
 	go func() {
 		defer close(out)
 		err = cmd.Wait()
+		cancelFunc()
 	}()
 	return out, nil
 }
@@ -142,7 +143,10 @@ func PipelineX(ffmpegBin string, ph interfacex.ProgressHandle, args interfacex.I
 	}
 	DebugPrint("%s", cmd.String())
 	return func(ctx context.Context, progressHandle ProgressHandle, handles ...func(process *os.Process)) error {
-		var stderrIn io.ReadCloser
+		err := ctx.Err()
+		if err != nil {
+			return err
+		}
 		stderrIn, err := cmd.StderrPipe()
 		if err != nil {
 			return fmt.Errorf("pipe %w", err)
@@ -155,25 +159,23 @@ func PipelineX(ffmpegBin string, ph interfacex.ProgressHandle, args interfacex.I
 			handle(cmd.Process)
 		}
 		hasFunc := progressHandle != nil
+		cancelCtx, cancelFunc := context.WithCancel(ctx)
 		out := make(chan metadatax.Progress)
 		go func() {
-			ph.MakeProgress(stderrIn, out)
+			ph.MakeProgress(cancelCtx, stderrIn, out)
 		}()
-		//done := make(chan error, 1)
 		go func() {
 			defer close(out)
 			err = cmd.Wait()
+			cancelFunc()
 		}()
 		for {
 			select {
-			case <-ctx.Done():
-				return ctx.Err()
+			case <-cancelCtx.Done():
+				return err
 			case data, ok := <-out:
 				if ok && hasFunc {
 					progressHandle(data)
-				}
-				if !ok {
-					return err
 				}
 			}
 		}

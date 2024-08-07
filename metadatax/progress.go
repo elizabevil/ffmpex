@@ -3,6 +3,8 @@ package metadatax
 import (
 	"bufio"
 	"bytes"
+	"context"
+	"fmt"
 	"github.com/elizabevil/ffmpegx/transcoderx/utilx"
 	"io"
 	"regexp"
@@ -36,7 +38,7 @@ type DefaultProgress struct {
 	Filter        func(str string) bool
 }
 
-func (r DefaultProgress) MakeProgress(stream io.ReadCloser, out chan Progress) {
+func (r DefaultProgress) MakeProgress(ctx context.Context, stream io.ReadCloser, out chan Progress) {
 	defer stream.Close()
 	split := func(data []byte, atEOF bool) (advance int, token []byte, spliterror error) {
 		if atEOF && len(data) == 0 {
@@ -110,7 +112,13 @@ func (r DefaultProgress) MakeProgress(stream io.ReadCloser, out chan Progress) {
 				}
 			}
 			pp.Progress = (utilx.DurToSec(pp.Time) * 100) / dursec
-			out <- pp
+			select {
+			case <-ctx.Done():
+				fmt.Println("make progress end")
+				return
+			default:
+				out <- pp
+			}
 		}
 	}
 }

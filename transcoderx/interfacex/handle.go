@@ -1,6 +1,7 @@
 package interfacex
 
 import (
+	"context"
 	"github.com/elizabevil/ffmpegx/metadatax"
 	"io"
 	"net/url"
@@ -12,5 +13,5 @@ type ProtocolOption interface {
 }
 
 type ProgressHandle interface {
-	MakeProgress(stream io.ReadCloser, out chan metadatax.Progress)
+	MakeProgress(ctx context.Context, stream io.ReadCloser, out chan metadatax.Progress)
 }
